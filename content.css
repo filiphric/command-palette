@@ -86,6 +86,7 @@ body.closing::before {
   border-radius: 8px;
   box-shadow: 0px 0px 72px 0px rgba(0,0,0,0.9);
   padding: 10px;
+  position: relative;
 }
 
 .cmd-palette-input {
@@ -97,6 +98,8 @@ body.closing::before {
   outline: none;
   background: transparent;
   color: var(--text-color);
+  position: relative;
+  z-index: 1;
 }
 
 .cmd-palette-list {
@@ -175,5 +178,21 @@ body.closing::before {
   width: 14px;
   height: 14px;
   fill: var(--text-color);
+}
+
+.cmd-palette-autocomplete {
+  position: absolute;
+  pointer-events: none;
+  color: var(--text-color);
+  opacity: 0.3;
+  font-size: 14px;
+  padding: 12px 10px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  top: 10px;
+  left: 10px;
+  width: calc(100% - 20px);
 }
 

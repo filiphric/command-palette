@@ -8,7 +8,9 @@
     "tabs",
     "activeTab",
     "scripting",
-    "tabCapture"
+    "tabCapture",
+    "history",
+    "topSites"
   ],
   "background": {
     "service_worker": "background.js"

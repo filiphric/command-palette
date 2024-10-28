@@ -25,6 +25,8 @@ class CommandPalette {
     this.loadTabs();
     this.createOverlay();
     this.setupEventListeners();
+    this.autocompleteText = '';
+    this.originalInputValue = '';
   }
 
   async loadTabs() {
@@ -73,8 +75,22 @@ class CommandPalette {
   }
 
   setupEventListeners() {
-    this.input.addEventListener('input', () => this.renderCommands());
-    this.input.addEventListener('keydown', async (e) => await this.handleKeydown(e));
+    this.input.addEventListener('input', async () => {
+      await this.renderCommands();
+      this.handleAutocomplete();
+    });
+    
+    this.input.addEventListener('keydown', async (e) => {
+      if (e.key === 'Tab' && this.autocompleteText) {
+        e.preventDefault();
+        this.input.value = this.autocompleteText;
+        this.handleAutocomplete();
+        this.renderCommands();
+      } else {
+        await this.handleKeydown(e);
+      }
+    });
+    
     this.overlay.addEventListener('click', async (e) => {
       if (e.target === this.overlay) {
         await this.fadeOutAndClose();
@@ -97,12 +113,18 @@ class CommandPalette {
     this.overlay.classList.remove('visible');
   }
 
-  renderCommands() {
+  async renderCommands() {
     const filterText = this.input.value.toLowerCase();
-    const filteredCommands = this.commands.filter(cmd => 
+    let filteredCommands = this.commands.filter(cmd => 
       cmd.name.toLowerCase().includes(filterText)
     );
-
+  
+    // Add URL suggestions if input looks like a URL or search
+    if (filterText.length > 0) {
+      const urlSuggestions = await this.getUrlSuggestions(filterText);
+      filteredCommands = [...filteredCommands, ...urlSuggestions];
+    }
+  
     // Add Google search command if no results and there's input
     if (filteredCommands.length === 0 && filterText.length > 0) {
       filteredCommands.push({
@@ -114,7 +136,7 @@ class CommandPalette {
         }
       });
     }
-
+  
     this.list.innerHTML = '';
     filteredCommands.forEach((cmd, index) => {
       const li = document.createElement('li');
@@ -208,9 +230,18 @@ class CommandPalette {
     }
     this.renderCommands();
   }
+  
   async executeCommand(command) {
+    // Execute the command first
     await command.action();
-    await this.fadeOutAndClose();
+    
+    // Only close the palette if it's not a URL/history navigation
+    if (command.type !== 'history') {
+      await this.fadeOutAndClose();
+    } else {
+      // For URL navigation, just close the palette tab without animation
+      chrome.runtime.sendMessage({ command: 'closeTab' });
+    }
   }
 
   async fadeOutAndClose() {
@@ -219,6 +250,117 @@ class CommandPalette {
     this.overlay.style.pointerEvents = 'none';
     await new Promise(resolve => setTimeout(resolve, 200));
     chrome.runtime.sendMessage({ command: 'closeTab' });
+  }
+
+  handleAutocomplete() {
+    const inputValue = this.input.value.toLowerCase();
+    if (!inputValue) {
+      this.autocompleteText = '';
+      return;
+    }
+
+    // First check commands
+    const filteredCommands = this.commands.filter(cmd => 
+      cmd.name.toLowerCase().startsWith(inputValue)
+    );
+
+    if (filteredCommands.length > 0) {
+      this.autocompleteText = filteredCommands[0].name;
+      this.showAutocomplete();
+      return;
+    }
+
+    // Then check URLs
+    chrome.topSites.get(sites => {
+      const matchingSite = sites.find(site => 
+        site.url.toLowerCase().startsWith(inputValue) ||
+        site.title.toLowerCase().startsWith(inputValue)
+      );
+
+      if (matchingSite) {
+        this.autocompleteText = matchingSite.url;
+        this.showAutocomplete();
+      } else {
+        this.autocompleteText = '';
+        const existingGhost = document.querySelector('.cmd-palette-autocomplete');
+        if (existingGhost) {
+          existingGhost.remove();
+        }
+      }
+    });
+  }
+
+  showAutocomplete() {
+    const inputValue = this.input.value;
+    if (this.autocompleteText && this.autocompleteText.toLowerCase().startsWith(inputValue.toLowerCase())) {
+      const ghost = document.createElement('div');
+      ghost.className = 'cmd-palette-autocomplete';
+      ghost.textContent = this.autocompleteText;
+      
+      // Remove existing ghost text
+      const existingGhost = document.querySelector('.cmd-palette-autocomplete');
+      if (existingGhost) {
+        existingGhost.remove();
+      }
+      
+      // Add ghost text to container instead of overlay
+      this.input.parentElement.appendChild(ghost);
+    }
+  }
+
+  async getUrlSuggestions(query) {
+    if (!query) return [];
+    
+    try {
+      // Get top sites with error handling
+      const topSites = await new Promise((resolve) => {
+        chrome.topSites.get((sites) => {
+          resolve(sites || []);
+        });
+      });
+
+      // Get history items with error handling
+      const historyItems = await new Promise((resolve) => {
+        chrome.history.search({
+          text: query,
+          maxResults: 10,
+          startTime: Date.now() - (30 * 24 * 60 * 60 * 1000) // Last 30 days
+        }, (items) => {
+          resolve(items || []);
+        });
+      });
+
+      // Combine and format items as commands
+      const allItems = [...topSites, ...historyItems];
+      const uniqueItems = Array.from(
+        new Map(
+          allItems.map(item => [item.url, {
+            ...item,
+            score: (topSites.find(s => s.url === item.url) ? 2 : 0) + 
+                   (item.visitCount || 0)
+          }])
+        ).values()
+      );
+      
+      return uniqueItems
+        .sort((a, b) => b.score - a.score)
+        .filter(item => 
+          item.url.toLowerCase().includes(query.toLowerCase()) ||
+          (item.title && item.title.toLowerCase().includes(query.toLowerCase()))
+        )
+        .slice(0, 5)
+        .map(item => ({
+          name: item.title || item.url,
+          description: item.url,
+          action: () => {
+            chrome.tabs.create({ url: item.url });
+          },
+          type: 'history'
+        }));
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      return [];
+    }
   }
 }
 

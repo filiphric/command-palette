@@ -115,10 +115,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case 'closeTab':
       if (sender.tab.id === paletteTabId) {
         paletteTabId = null;
-        // Return focus to last active tab before closing palette
-        chrome.tabs.update(lastActiveTabId, { active: true });
-        chrome.windows.update(lastActiveWindowId, { focused: true });
         chrome.tabs.remove(sender.tab.id);
+        return true;
       }
       return true;
     case 'duplicateTab':
