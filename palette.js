@@ -42,7 +42,7 @@ class CommandPalette {
               },
               favicon: tab.favicon
             }));
-          this.commands = [...this.commands, ...tabCommands];
+          this.commands = [...tabCommands, ...this.commands];
         }
         resolve();
       });
