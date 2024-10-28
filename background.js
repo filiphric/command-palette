@@ -59,12 +59,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'getTabs') {
     chrome.tabs.query({}, (tabs) => {
       sendResponse({ 
-        tabs: tabs.map(tab => ({
-          id: tab.id,
-          title: tab.title || 'Untitled',
-          url: tab.url,
-          windowId: tab.windowId
-        })),
+        tabs: tabs.map(tab => {
+          const favicon = tab.favIconUrl || getFallbackFavicon(tab.url);
+          return {
+            id: tab.id,
+            title: tab.title || 'Untitled',
+            url: tab.url,
+            windowId: tab.windowId,
+            favicon: favicon
+          };
+        }),
         paletteTabId: paletteTabId
       });
     });
@@ -94,6 +98,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'createNewTab') {
     // Create new tab and get its ID
     const newTab = chrome.tabs.create({});
+    
     // Close palette tab
     if (sender.tab.id === paletteTabId) {
       paletteTabId = null;
@@ -121,3 +126,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
   }
 });
+
+function getFallbackFavicon(url) {
+  try {
+    const domain = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+  } catch (e) {
+    return '';
+  }
+}

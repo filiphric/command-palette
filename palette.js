@@ -32,14 +32,15 @@ class CommandPalette {
           const tabCommands = response.tabs
             .filter(tab => tab.id !== response.paletteTabId)
             .map(tab => ({
-              name: `Switch to: ${tab.title}`,
+              name: `${tab.title}`,
               action: async () => {
                 chrome.runtime.sendMessage({ 
                   action: 'switchTab', 
                   tabId: tab.id,
                   windowId: tab.windowId
                 });
-              }
+              },
+              favicon: tab.favicon
             }));
           this.commands = [...this.commands, ...tabCommands];
         }
@@ -115,7 +116,21 @@ class CommandPalette {
     filteredCommands.forEach((cmd, index) => {
       const li = document.createElement('li');
       li.className = `cmd-palette-item ${index === this.selectedIndex ? 'selected' : ''}`;
-      li.textContent = cmd.name;
+      
+      if (cmd.favicon) {
+        const icon = document.createElement('img');
+        icon.src = cmd.favicon;
+        icon.className = 'cmd-palette-icon';
+        icon.onerror = () => {
+          icon.style.display = 'none';
+        };
+        li.appendChild(icon);
+      }
+      
+      const text = document.createElement('span');
+      text.textContent = cmd.name;
+      li.appendChild(text);
+      
       li.addEventListener('click', () => this.executeCommand(cmd));
       li.addEventListener('mousemove', () => {
         if (!this.isKeyboardNavigation) {
