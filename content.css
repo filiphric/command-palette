@@ -118,6 +118,3 @@ body.closing::before {
   background-color: var(--selected-bg);
 }
 
-.cmd-palette-item:hover {
-  background-color: var(--hover-bg);
-}

@@ -4,6 +4,7 @@ class CommandPalette {
     console.log('Command palette initialized');
     this.isVisible = false;
     this.selectedIndex = 0;
+    this.isKeyboardNavigation = false;
     this.commands = [
       { name: 'New Tab', action: () => chrome.runtime.sendMessage({ command: 'newTab' }) },
       { 
@@ -95,10 +96,15 @@ class CommandPalette {
       li.className = `cmd-palette-item ${index === this.selectedIndex ? 'selected' : ''}`;
       li.textContent = cmd.name;
       li.addEventListener('click', () => this.executeCommand(cmd));
+      li.addEventListener('mousemove', () => {
+        if (!this.isKeyboardNavigation) {
+          this.selectedIndex = index;
+          this.renderCommands();
+        }
+      });
       this.list.appendChild(li);
     });
     
-    // Store filtered commands for use in handleKeydown
     this.filteredCommands = filteredCommands;
   }
 
@@ -107,12 +113,12 @@ class CommandPalette {
     
     switch (e.key) {
       case 'ArrowDown':
-        e.preventDefault();
-        this.selectedIndex = (this.selectedIndex + 1) % items.length;
-        break;
       case 'ArrowUp':
         e.preventDefault();
-        this.selectedIndex = (this.selectedIndex - 1 + items.length) % items.length;
+        this.isKeyboardNavigation = true;
+        this.selectedIndex = e.key === 'ArrowDown' 
+          ? (this.selectedIndex + 1) % items.length
+          : (this.selectedIndex - 1 + items.length) % items.length;
         break;
       case 'Enter':
         e.preventDefault();
