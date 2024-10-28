@@ -1,23 +1,69 @@
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: transparent;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Add a full-screen overlay for the blur effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(0px);
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 1;
+  transition: backdrop-filter 200ms ease-out, background-color 200ms ease-out;
+}
+
+/* Add class to trigger the animation */
+body.loaded::before {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+body.closing::before {
+  backdrop-filter: blur(0px);
+  background-color: rgba(0, 0, 0, 0);
+}
+
 .cmd-palette-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: none;
+  display: flex;
   justify-content: center;
   align-items: flex-start;
   padding-top: 20vh;
-  z-index: 999999;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+  pointer-events: none;
+}
+
+.cmd-palette-overlay.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
 }
 
 .cmd-palette-container {
   width: 90%;
   max-width: 600px;
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
   border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   padding: 10px;
 }
 

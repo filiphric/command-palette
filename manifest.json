@@ -7,7 +7,8 @@
     "commands",
     "tabs",
     "activeTab",
-    "scripting"
+    "scripting",
+    "tabCapture"
   ],
   "background": {
     "service_worker": "background.js"
