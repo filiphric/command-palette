@@ -1,0 +1,53 @@
+.cmd-palette-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20vh;
+  z-index: 999999;
+}
+
+.cmd-palette-container {
+  width: 90%;
+  max-width: 600px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.cmd-palette-input {
+  width: calc(100% - 20px);
+  padding: 12px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.cmd-palette-list {
+  list-style: none;
+  margin: 8px 0 0 0;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.cmd-palette-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.cmd-palette-item.selected {
+  background-color: #f0f0f0;
+}
+
+.cmd-palette-item:hover {
+  background-color: #f5f5f5;
+}

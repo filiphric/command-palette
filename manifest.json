@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Brave Command Palette",
+  "version": "1.0",
+  "description": "A command palette for Brave browser",
+  "permissions": [
+    "commands",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "toggle-command-palette": {
+      "suggested_key": {
+        "mac": "Command+K",
+        "windows": "Ctrl+K",
+        "linux": "Ctrl+K"
+      },
+      "description": "Toggle command palette"
+    }
+  }
+}
