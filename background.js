@@ -42,6 +42,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ screenshot: currentScreenshot });
     return true;
   }
+  if (request.action === 'getTabs') {
+    chrome.tabs.query({}, (tabs) => {
+      sendResponse({ 
+        tabs: tabs.map(tab => ({
+          id: tab.id,
+          title: tab.title || 'Untitled',
+          url: tab.url,
+          windowId: tab.windowId
+        })),
+        paletteTabId: paletteTabId
+      });
+    });
+    return true;
+  }
+  if (request.action === 'switchTab') {
+    chrome.tabs.update(request.tabId, { active: true });
+    chrome.windows.update(request.windowId, { focused: true });
+    // Close palette tab after switching
+    if (sender.tab.id === paletteTabId) {
+      paletteTabId = null;
+      chrome.tabs.remove(sender.tab.id);
+    }
+    return true;
+  }
   switch (request.command) {
     case 'newTab':
       chrome.tabs.create({});

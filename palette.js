@@ -7,11 +7,30 @@ class CommandPalette {
     this.commands = [
       { name: 'New Tab', action: () => chrome.runtime.sendMessage({ command: 'newTab' }) },
       { name: 'Close Tab', action: () => chrome.runtime.sendMessage({ command: 'closeTab' }) },
-      { name: 'Duplicate Tab', action: () => chrome.runtime.sendMessage({ command: 'duplicateTab' }) }
     ];
     
+    this.loadTabs();
     this.createOverlay();
     this.setupEventListeners();
+  }
+
+  async loadTabs() {
+    const response = await chrome.runtime.sendMessage({ action: 'getTabs' });
+    if (response.tabs) {
+      const tabCommands = response.tabs
+        .filter(tab => tab.id !== response.paletteTabId) // Filter out palette tab
+        .map(tab => ({
+          name: `Switch to: ${tab.title}`,
+          action: async () => {
+            chrome.runtime.sendMessage({ 
+              action: 'switchTab', 
+              tabId: tab.id,
+              windowId: tab.windowId
+            });
+          }
+        }));
+      this.commands = [...this.commands, ...tabCommands];
+    }
   }
 
   createOverlay() {
@@ -50,6 +69,7 @@ class CommandPalette {
     setTimeout(() => {
       this.overlay.classList.add('visible');
       this.input.focus();
+      this.renderCommands(); // Add this line to show initial commands
     }, 50);
   }
 
@@ -72,6 +92,9 @@ class CommandPalette {
       li.addEventListener('click', () => this.executeCommand(cmd));
       this.list.appendChild(li);
     });
+    
+    // Store filtered commands for use in handleKeydown
+    this.filteredCommands = filteredCommands;
   }
 
   async handleKeydown(e) {
@@ -88,7 +111,7 @@ class CommandPalette {
         break;
       case 'Enter':
         e.preventDefault();
-        const selectedCommand = this.commands[this.selectedIndex];
+        const selectedCommand = this.filteredCommands[this.selectedIndex];
         if (selectedCommand) await this.executeCommand(selectedCommand);
         break;
       case 'Escape':
