@@ -90,6 +90,18 @@ class CommandPalette {
       cmd.name.toLowerCase().includes(filterText)
     );
 
+    // Add Google search command if no results and there's input
+    if (filteredCommands.length === 0 && filterText.length > 0) {
+      filteredCommands.push({
+        name: `Search Google for "${this.input.value}"`,
+        action: () => {
+          chrome.tabs.create({ 
+            url: `https://www.google.com/search?q=${encodeURIComponent(this.input.value)}`
+          });
+        }
+      });
+    }
+
     this.list.innerHTML = '';
     filteredCommands.forEach((cmd, index) => {
       const li = document.createElement('li');
