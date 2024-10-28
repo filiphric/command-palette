@@ -29,9 +29,17 @@ chrome.commands.onCommand.addListener(async (command) => {
       await captureTab();
       const tab = await chrome.tabs.create({
         url: 'palette.html',
-        active: true
+        active: false  // Don't switch to tab immediately
       });
       paletteTabId = tab.id;
+
+      // Wait for the tab to be fully loaded before switching to it
+      chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+        if (tabId === tab.id && info.status === 'complete') {
+          chrome.tabs.onUpdated.removeListener(listener);
+          chrome.tabs.update(tab.id, { active: true });
+        }
+      });
     }
   }
 });

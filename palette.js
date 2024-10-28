@@ -146,14 +146,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Initialize differently
 async function initialize() {
-  // Get the screenshot
   const response = await chrome.runtime.sendMessage({ action: 'getScreenshot' });
   if (response.screenshot) {
-    document.body.style.backgroundImage = `url(${response.screenshot})`;
-    // Add small delay to ensure background is loaded
-    requestAnimationFrame(() => {
-      document.body.classList.add('loaded');
+    // Create an image element to track when the background image is fully loaded
+    const img = new Image();
+    
+    await new Promise((resolve) => {
+      img.onload = resolve;
+      img.src = response.screenshot;
     });
+
+    // Set the background image
+    document.body.style.backgroundImage = `url(${response.screenshot})`;
+    
+    // Wait for next frame to add the loaded class
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    document.body.classList.add('loaded');
+    
+    // Wait for blur animation to start
+    await new Promise(resolve => setTimeout(resolve, 50));
   }
 
   const cmdPalette = new CommandPalette();
