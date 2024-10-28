@@ -8,12 +8,14 @@ class CommandPalette {
     this.commands = [
       { 
         name: 'New Tab', 
+        shortcut: '⌘+T',
         action: () => chrome.runtime.sendMessage({ 
           action: 'createNewTab'  // Changed from command: 'newTab'
         }) 
       },
       { 
         name: 'Close Tab', 
+        shortcut: '⌘+W',
         action: () => chrome.runtime.sendMessage({ 
           action: 'closeLastActiveTab'  // New action type
         }) 
@@ -33,6 +35,7 @@ class CommandPalette {
             .filter(tab => tab.id !== response.paletteTabId)
             .map(tab => ({
               name: `${tab.title}`,
+              description: 'Switch to Tab',
               action: async () => {
                 chrome.runtime.sendMessage({ 
                   action: 'switchTab', 
@@ -130,6 +133,43 @@ class CommandPalette {
       const text = document.createElement('span');
       text.textContent = cmd.name;
       li.appendChild(text);
+
+      if (cmd.description) {
+        const description = document.createElement('span');
+        description.textContent = cmd.description;
+        description.className = 'cmd-palette-description';
+        li.appendChild(description);
+      }
+
+      if (cmd.shortcut) {
+        const shortcutContainer = document.createElement('div');
+        shortcutContainer.className = 'cmd-palette-shortcut';
+        
+        // Split shortcut into individual keys
+        const keys = cmd.shortcut.split('+');
+        keys.forEach((key, index) => {
+          const kbd = document.createElement('kbd');
+          
+          // Check if it's a command key on Mac
+          if (key.trim() === '⌘') {
+            kbd.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path d="M6.5 21q-1.45 0-2.475-1.025T3 17.5t1.025-2.475T6.5 14H8v-4H6.5q-1.45 0-2.475-1.025T3 6.5t1.025-2.475T6.5 3t2.475 1.025T10 6.5V8h4V6.5q0-1.45 1.025-2.475T17.5 3t2.475 1.025T21 6.5t-1.025 2.475T17.5 10H16v4h1.5q1.45 0 2.475 1.025T21 17.5t-1.025 2.475T17.5 21t-2.475-1.025T14 17.5V16h-4v1.5q0 1.45-1.025 2.475T6.5 21m0-2q.625 0 1.063-.437T8 17.5V16H6.5q-.625 0-1.062.438T5 17.5t.438 1.063T6.5 19m11 0q.625 0 1.063-.437T19 17.5t-.437-1.062T17.5 16H16v1.5q0 .625.438 1.063T17.5 19M10 14h4v-4h-4zM6.5 8H8V6.5q0-.625-.437-1.062T6.5 5t-1.062.438T5 6.5t.438 1.063T6.5 8M16 8h1.5q.625 0 1.063-.437T19 6.5t-.437-1.062T17.5 5t-1.062.438T16 6.5z"/></svg>`;
+            kbd.className = 'cmd-palette-shortcut-cmd';
+          } else {
+            kbd.textContent = key.trim();
+          }
+          
+          shortcutContainer.appendChild(kbd);
+          
+          if (index < keys.length - 1) {
+            const plus = document.createElement('span');
+            plus.textContent = '+';
+            plus.style.opacity = '0.5';
+            shortcutContainer.appendChild(plus);
+          }
+        });
+        
+        li.appendChild(shortcutContainer);
+      }
       
       li.addEventListener('click', () => this.executeCommand(cmd));
       li.addEventListener('mousemove', () => {

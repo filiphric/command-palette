@@ -110,15 +110,22 @@ body.closing::before {
 .cmd-palette-item {
   padding: 8px 10px;
   cursor: pointer;
-  border-bottom: 1px solid var(--border-color);
   color: var(--text-color);
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: space-between;
 }
 
 .cmd-palette-item.selected {
   background-color: var(--selected-bg);
+}
+
+.cmd-palette-description {
+  color: var(--text-color);
+  opacity: 0.3;
+  margin-left: auto;
+  font-size: 0.9em;
 }
 
 .cmd-palette-icon {
@@ -126,5 +133,47 @@ body.closing::before {
   height: 16px;
   flex-shrink: 0;
   object-fit: contain;
+}
+
+.cmd-palette-shortcut {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.cmd-palette-shortcut kbd {
+  background: var(--shortcut-bg, rgba(128, 128, 128, 0.15));
+  border: 1px solid var(--shortcut-border, rgba(128, 128, 128, 0.2));
+  border-bottom: 2px solid var(--shortcut-border, rgba(128, 128, 128, 0.2));
+  border-radius: 4px;
+  padding: 2px 3px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.8em;
+  color: var(--text-color);
+  opacity: 0.8;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+}
+
+.cmd-palette-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.cmd-palette-shortcut-cmd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px !important;
+}
+
+.cmd-palette-shortcut-cmd svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--text-color);
 }
 
