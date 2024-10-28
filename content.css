@@ -74,7 +74,7 @@ body.closing::before {
     --hover-bg: #333;
     --selected-bg: #383838;
     --text-color: #fff;
-    --container-bg: rgba(30, 30, 30, var(--bg-opacity));
+    --container-bg: rgba(30, 30, 30);
   }
 }
 

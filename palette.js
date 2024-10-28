@@ -6,7 +6,12 @@ class CommandPalette {
     this.selectedIndex = 0;
     this.commands = [
       { name: 'New Tab', action: () => chrome.runtime.sendMessage({ command: 'newTab' }) },
-      { name: 'Close Tab', action: () => chrome.runtime.sendMessage({ command: 'closeTab' }) },
+      { 
+        name: 'Close Tab', 
+        action: () => chrome.runtime.sendMessage({ 
+          action: 'closeLastActiveTab'  // New action type
+        }) 
+      }
     ];
     
     this.loadTabs();

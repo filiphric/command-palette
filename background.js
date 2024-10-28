@@ -2,9 +2,11 @@ console.log('Background script loaded');
 
 let paletteTabId = null;
 let currentScreenshot = null;
+let lastActiveTabId = null;
 
 async function captureTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  lastActiveTabId = tab.id;  // Store the last active tab
   const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'jpeg' });
   currentScreenshot = dataUrl;
 }
@@ -71,6 +73,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (sender.tab.id === paletteTabId) {
       paletteTabId = null;
       chrome.tabs.remove(sender.tab.id);
+    }
+    return true;
+  }
+  if (request.action === 'closeLastActiveTab') {
+    if (lastActiveTabId) {
+      chrome.tabs.remove(lastActiveTabId);
+      // Also close the palette tab
+      if (sender.tab.id === paletteTabId) {
+        paletteTabId = null;
+        chrome.tabs.remove(sender.tab.id);
+      }
     }
     return true;
   }
