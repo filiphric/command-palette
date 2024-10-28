@@ -6,7 +6,12 @@ class CommandPalette {
     this.selectedIndex = 0;
     this.isKeyboardNavigation = false;
     this.commands = [
-      { name: 'New Tab', action: () => chrome.runtime.sendMessage({ command: 'newTab' }) },
+      { 
+        name: 'New Tab', 
+        action: () => chrome.runtime.sendMessage({ 
+          action: 'createNewTab'  // Changed from command: 'newTab'
+        }) 
+      },
       { 
         name: 'Close Tab', 
         action: () => chrome.runtime.sendMessage({ 
@@ -21,22 +26,26 @@ class CommandPalette {
   }
 
   async loadTabs() {
-    const response = await chrome.runtime.sendMessage({ action: 'getTabs' });
-    if (response.tabs) {
-      const tabCommands = response.tabs
-        .filter(tab => tab.id !== response.paletteTabId) // Filter out palette tab
-        .map(tab => ({
-          name: `Switch to: ${tab.title}`,
-          action: async () => {
-            chrome.runtime.sendMessage({ 
-              action: 'switchTab', 
-              tabId: tab.id,
-              windowId: tab.windowId
-            });
-          }
-        }));
-      this.commands = [...this.commands, ...tabCommands];
-    }
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage({ action: 'getTabs' }, (response) => {
+        if (response && response.tabs) {
+          const tabCommands = response.tabs
+            .filter(tab => tab.id !== response.paletteTabId)
+            .map(tab => ({
+              name: `Switch to: ${tab.title}`,
+              action: async () => {
+                chrome.runtime.sendMessage({ 
+                  action: 'switchTab', 
+                  tabId: tab.id,
+                  windowId: tab.windowId
+                });
+              }
+            }));
+          this.commands = [...this.commands, ...tabCommands];
+        }
+        resolve();
+      });
+    });
   }
 
   createOverlay() {
@@ -144,7 +153,6 @@ class CommandPalette {
     }
     this.renderCommands();
   }
-
   async executeCommand(command) {
     await command.action();
     await this.fadeOutAndClose();
@@ -195,3 +203,4 @@ async function initialize() {
 }
 
 document.addEventListener('DOMContentLoaded', initialize);
+

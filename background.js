@@ -3,10 +3,12 @@ console.log('Background script loaded');
 let paletteTabId = null;
 let currentScreenshot = null;
 let lastActiveTabId = null;
+let lastActiveWindowId = null;
 
 async function captureTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  lastActiveTabId = tab.id;  // Store the last active tab
+  lastActiveTabId = tab.id;
+  lastActiveWindowId = tab.windowId;
   const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'jpeg' });
   currentScreenshot = dataUrl;
 }
@@ -17,9 +19,12 @@ chrome.commands.onCommand.addListener(async (command) => {
       try {
         const tab = await chrome.tabs.get(paletteTabId);
         if (tab) {
-          // Send message to start animation
+          // First switch back to the last active tab
+          await chrome.tabs.update(lastActiveTabId, { active: true });
+          await chrome.windows.update(lastActiveWindowId, { focused: true });
+          
+          // Then start closing animation and remove palette tab
           await chrome.tabs.sendMessage(tab.id, { action: 'startClosing' });
-          // Wait for animation
           await new Promise(resolve => setTimeout(resolve, 200));
           await chrome.tabs.remove(paletteTabId);
         }
@@ -31,11 +36,10 @@ chrome.commands.onCommand.addListener(async (command) => {
       await captureTab();
       const tab = await chrome.tabs.create({
         url: 'palette.html',
-        active: false  // Don't switch to tab immediately
+        active: false
       });
       paletteTabId = tab.id;
 
-      // Wait for the tab to be fully loaded before switching to it
       chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
         if (tabId === tab.id && info.status === 'complete') {
           chrome.tabs.onUpdated.removeListener(listener);
@@ -87,6 +91,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return true;
   }
+  if (request.action === 'createNewTab') {
+    // Create new tab and get its ID
+    const newTab = chrome.tabs.create({});
+    // Close palette tab
+    if (sender.tab.id === paletteTabId) {
+      paletteTabId = null;
+      chrome.tabs.remove(sender.tab.id);
+    }
+    // Ensure focus stays on new tab
+    chrome.tabs.update(newTab.id, { active: true });
+    return true;
+  }
   switch (request.command) {
     case 'newTab':
       chrome.tabs.create({});
@@ -94,9 +110,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case 'closeTab':
       if (sender.tab.id === paletteTabId) {
         paletteTabId = null;
+        // Return focus to last active tab before closing palette
+        chrome.tabs.update(lastActiveTabId, { active: true });
+        chrome.windows.update(lastActiveWindowId, { focused: true });
+        chrome.tabs.remove(sender.tab.id);
       }
-      chrome.tabs.remove(sender.tab.id);
-      break;
+      return true;
     case 'duplicateTab':
       chrome.tabs.duplicate(sender.tab.id);
       break;
