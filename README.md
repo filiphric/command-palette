@@ -1,10 +1,10 @@
  # Command Palette for Browsers
 
-[![Chrome](https://img.shields.io/badge/Chrome-✓-green.svg)](https://chrome.google.com/webstore)
+<div align="center">
 
-[![Edge](https://img.shields.io/badge/Edge-✓-green.svg)](https://microsoftedge.microsoft.com/addons)
+[![Chrome](https://img.shields.io/badge/Chrome-✓-green.svg)](https://chrome.google.com/webstore) [![Edge](https://img.shields.io/badge/Edge-✓-green.svg)](https://microsoftedge.microsoft.com/addons) [![Brave](https://img.shields.io/badge/Brave-✓-green.svg)](https://chrome.google.com/webstore)
+</div>
 
-[![Brave](https://img.shields.io/badge/Brave-✓-green.svg)](https://chrome.google.com/webstore)
 
 A command palette for browsers that provides quick access to tabs, bookmarks, and browser actions through a keyboard-driven interface.
 
