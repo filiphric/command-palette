@@ -1,4 +1,3 @@
-// Copy the CommandPalette class from content.js
 class CommandPalette {
   constructor() {
     console.log('Command palette initialized');
@@ -10,14 +9,14 @@ class CommandPalette {
         name: 'New Tab', 
         shortcut: '⌘+T',
         action: () => chrome.runtime.sendMessage({ 
-          action: 'createNewTab'  // Changed from command: 'newTab'
+          action: 'createNewTab'
         }) 
       },
       { 
         name: 'Close Tab', 
         shortcut: '⌘+W',
         action: () => chrome.runtime.sendMessage({ 
-          action: 'closeLastActiveTab'  // New action type
+          action: 'closeLastActiveTab'
         }) 
       }
     ];
@@ -230,7 +229,7 @@ class CommandPalette {
     }
     this.renderCommands();
   }
-  
+
   async executeCommand(command) {
     // Execute the command first
     await command.action();
