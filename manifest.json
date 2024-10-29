@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Brave Command Palette",
+  "name": "Command Palette",
   "version": "1.0",
-  "description": "A command palette for Brave browser",
+  "description": "A command palette",
   "permissions": [
     "commands",
     "tabs",
