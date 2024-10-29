@@ -3,23 +3,24 @@
 <div align="center">
 
 [![Chrome](https://img.shields.io/badge/Chrome-✓-green.svg)](https://chrome.google.com/webstore) [![Edge](https://img.shields.io/badge/Edge-✓-green.svg)](https://microsoftedge.microsoft.com/addons) [![Brave](https://img.shields.io/badge/Brave-✓-green.svg)](https://chrome.google.com/webstore)
+
+<img src="./preview.png" alt="Command Palette Preview" width="600"/>
 </div>
 
+A keyboard-driven command palette for browsers that provides quick access to tabs, bookmarks, and browser actions. Inspired by VS Code's command palette and Spotlight search.
 
-A command palette for browsers that provides quick access to tabs, bookmarks, and browser actions through a keyboard-driven interface.
+## ✨ Features
 
-![Command Palette Preview](./preview.png)
+- 🚀 **Quick Tab Switching**: Instantly switch between open tabs
+- ⌨️ **Keyboard-First**: Designed for keyboard-centric navigation
+- 🔍 **Smart Search**: Fuzzy search across tabs, commands, and history
+- 📖 **History Integration**: Quick access to recently visited pages
+- 🎯 **Smart Suggestions**: Shows most visited sites first
+- ⚡ **Lightweight**: Fast and responsive with minimal overhead
+- 🎨 **Beautiful UI**: Clean, modern interface with blur effects
+- 🌙 **Dark Mode**: Matches your browser's theme
 
-## Features
-
-- 🚀 Quick tab switching
-- ⌨️ Keyboard-first navigation
-- 🔍 Fuzzy search for tabs and commands
-- 📖 Browser history integration
-- 🎯 Most visited sites suggestions
-- ⚡ Fast and lightweight
-
-## Installation
+## 🚀 Installation
 
 ### From Source
 1. Clone this repository:
@@ -27,31 +28,58 @@ A command palette for browsers that provides quick access to tabs, bookmarks, an
 git clone https://github.com/yourusername/browser-command-palette.git
 ```
 
-2. Open Chrome/Brave/Edge and navigate to:
-   - Chrome: `chrome://extensions`
-   - Brave: `brave://extensions`
-   - Edge: `edge://extensions`
+2. Install dependencies and build:
+```bash
+npm install
+npm run build
+```
 
-3. Enable "Developer mode" in the top right corner
-
-4. Click "Load unpacked" and select the cloned repository folder
+3. Load in your browser:
+   - Open `chrome://extensions` (Chrome), `brave://extensions` (Brave), or `edge://extensions` (Edge)
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist` folder
 
 ### From Web Store
 *(Coming soon)*
 
-## Usage
+## 🎮 Usage
 
-1. Press `Cmd+K` (Mac) or `Ctrl+K` (Windows/Linux) to open the command palette
-2. Type to search for:
-   - Open tabs
-   - Browser commands
-   - Recently visited sites
-   - Most frequently visited sites
-3. Use arrow keys to navigate and Enter to select
-4. Press Tab to autocomplete suggestions
+1. Open Command Palette:
+   - Mac: `⌘ + K`
+   - Windows/Linux: `Ctrl + K`
 
-## Browser Support
+2. Available Commands:
+   - `New Tab`: Create a new tab
+   - `Close Tab`: Close current tab
+   - Type any URL or search term
+   - Type tab name to switch tabs
 
-- ✓ Google Chrome (Latest)
-- ✓ Microsoft Edge (Latest)
-- ✓ Brave Browser (Latest)
+3. Navigation:
+   - `↑↓`: Navigate suggestions
+   - `Enter`: Select item
+   - `Tab`: Autocomplete suggestion
+   - `Esc`: Close palette
+
+## 🔧 Development
+```bash
+# Install dependencies
+npm install
+# Build extension
+npm run build
+# The extension will be built to ./dist
+```
+
+## 🌐 Browser Support
+
+- ✓ Google Chrome 88+
+- ✓ Microsoft Edge 88+
+- ✓ Brave Browser 1.20+
+
+## 📝 License
+
+MIT License - See [LICENSE](./LICENSE) for details
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.

@@ -1,0 +1,11 @@
+{
+  "name": "browser-command-palette",
+  "version": "1.0.0",
+  "description": "A command palette for browsers",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "archiver": "^5.3.1"
+  }
+} 
