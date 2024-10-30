@@ -21,11 +21,22 @@ class CommandPalette {
       }
     ];
     
-    this.loadTabs();
     this.createOverlay();
     this.setupEventListeners();
     this.autocompleteText = '';
     this.originalInputValue = '';
+  }
+
+  async init() {
+    await this.loadTabs();
+    await this.show();
+  }
+
+  async show() {
+    this.isVisible = true;
+    this.overlay.classList.add('visible');
+    this.input.focus();
+    await this.renderCommands();
   }
 
   async loadTabs() {
@@ -113,16 +124,6 @@ class CommandPalette {
         await this.fadeOutAndClose();
       }
     });
-  }
-
-  show() {
-    this.isVisible = true;
-    // Add small delay to ensure it happens after the blur animation
-    setTimeout(() => {
-      this.overlay.classList.add('visible');
-      this.input.focus();
-      this.renderCommands(); // Add this line to show initial commands
-    }, 50);
   }
 
   hide() {
@@ -404,7 +405,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 async function initialize() {
   const response = await chrome.runtime.sendMessage({ action: 'getScreenshot' });
   if (response.screenshot) {
-    // Create an image element to track when the background image is fully loaded
     const img = new Image();
     
     await new Promise((resolve) => {
@@ -412,19 +412,14 @@ async function initialize() {
       img.src = response.screenshot;
     });
 
-    // Set the background image
     document.body.style.backgroundImage = `url(${response.screenshot})`;
-    
-    // Wait for next frame to add the loaded class
     await new Promise(resolve => requestAnimationFrame(resolve));
     document.body.classList.add('loaded');
-    
-    // Wait for blur animation to start
     await new Promise(resolve => setTimeout(resolve, 50));
   }
 
   const cmdPalette = new CommandPalette();
-  cmdPalette.show();
+  await cmdPalette.init();
 }
 
 document.addEventListener('DOMContentLoaded', initialize);

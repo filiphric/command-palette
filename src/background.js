@@ -87,9 +87,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const processedTabs = await Promise.all(tabs.map(async tab => {
         let favicon = faviconCache.get(tab.id);
         
-        // If not cached and has favicon URL, cache it
+        // If not cached and has favicon URL, try to cache it
         if (!favicon && tab.favIconUrl) {
-          favicon = await cacheFavicon(tab.id, tab.favIconUrl);
+          try {
+            favicon = await cacheFavicon(tab.id, tab.favIconUrl);
+          } catch (e) {
+            console.error('Error caching favicon:', e);
+            favicon = tab.favIconUrl; // Fallback to URL if caching fails
+          }
         }
         
         return {
@@ -97,7 +102,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           title: tab.title || 'Untitled',
           url: tab.url,
           windowId: tab.windowId,
-          favicon: favicon
+          favicon: favicon || tab.favIconUrl // Fallback to original favIconUrl if no cached version
         };
       }));
       
