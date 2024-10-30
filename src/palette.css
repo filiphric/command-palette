@@ -152,25 +152,21 @@ body.closing::before {
 }
 
 .cmd-palette-shortcut {
-  margin-left: auto;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.cmd-palette-shortcut kbd {
   background: var(--shortcut-bg, rgba(128, 128, 128, 0.15));
   border: 1px solid var(--shortcut-border, rgba(128, 128, 128, 0.2));
   border-bottom: 2px solid var(--shortcut-border, rgba(128, 128, 128, 0.2));
   border-radius: 4px;
-  padding: 2px 3px;
+  padding: 2px 5px;
   font-family: system-ui, -apple-system, sans-serif;
-  font-size: 0.8em;
+  font-size: 0.8rem;
   color: var(--text-color);
+  fill: var(--text-color);
   opacity: 0.8;
-  width: 14px;
-  height: 14px;
-  text-align: center;
+  margin-left: auto;
+  letter-spacing: 2px;
+  display: flex;
+  column-gap: 5px;
+  align-items: center;
 }
 
 .cmd-palette-item-left {
@@ -180,11 +176,10 @@ body.closing::before {
   flex: 1;
 }
 
-.cmd-palette-shortcut-cmd {
+.cmd-palette-shortcut-cmd, .cmd-palette-shortcut-shift {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 4px !important;
 }
 
 .cmd-palette-shortcut-cmd svg {
