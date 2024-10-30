@@ -74,17 +74,35 @@ class CommandPalette {
   }
 
   setupEventListeners() {
+    let inputTimeout;
+    
     this.input.addEventListener('input', async () => {
-      await this.renderCommands();
-      this.handleAutocomplete();
+      const currentValue = this.input.value;
+      
+      // Clear any pending updates
+      clearTimeout(inputTimeout);
+      
+      // Schedule the update with a small delay
+      inputTimeout = setTimeout(async () => {
+        // Ensure the input value hasn't changed during the delay
+        if (currentValue === this.input.value) {
+          await this.renderCommands();
+          this.handleAutocomplete();
+        }
+      }, 50);
     });
     
     this.input.addEventListener('keydown', async (e) => {
+      // Clear any pending input updates on special keys
+      if (['Tab', 'Enter', 'ArrowUp', 'ArrowDown', 'Escape'].includes(e.key)) {
+        clearTimeout(inputTimeout);
+      }
+      
       if (e.key === 'Tab' && this.autocompleteText) {
         e.preventDefault();
         this.input.value = this.autocompleteText;
         this.handleAutocomplete();
-        this.renderCommands();
+        await this.renderCommands();
       } else {
         await this.handleKeydown(e);
       }
@@ -253,8 +271,14 @@ class CommandPalette {
 
   handleAutocomplete() {
     const inputValue = this.input.value.toLowerCase();
+    
+    // Clear autocomplete if input is empty
     if (!inputValue) {
       this.autocompleteText = '';
+      const existingGhost = document.querySelector('.cmd-palette-autocomplete');
+      if (existingGhost) {
+        existingGhost.remove();
+      }
       return;
     }
 
@@ -269,15 +293,29 @@ class CommandPalette {
       return;
     }
 
-    // Then check URLs
-    chrome.topSites.get(sites => {
-      const matchingSite = sites.find(site => 
-        site.url.toLowerCase().startsWith(inputValue) ||
-        site.title.toLowerCase().startsWith(inputValue)
-      );
+    // Check history for URL suggestions
+    chrome.history.search({
+      text: '',
+      maxResults: 100,
+      startTime: 0
+    }, (historyItems) => {
+      const hostScores = new Map();
+      historyItems.forEach(item => {
+        try {
+          const host = new URL(item.url).hostname;
+          const currentScore = hostScores.get(host) || 0;
+          const newScore = currentScore + (item.visitCount || 0) + (item.typedCount || 0);
+          hostScores.set(host, newScore);
+        } catch (e) {}
+      });
 
-      if (matchingSite) {
-        this.autocompleteText = matchingSite.url;
+      const matchingHosts = Array.from(hostScores.entries())
+        .filter(([host]) => host.includes(inputValue))
+        .sort((a, b) => b[1] - a[1]);
+
+      if (matchingHosts.length > 0) {
+        const suggestedHost = matchingHosts[0][0];
+        this.autocompleteText = suggestedHost;
         this.showAutocomplete();
       } else {
         this.autocompleteText = '';
@@ -311,46 +349,42 @@ class CommandPalette {
     if (!query) return [];
     
     try {
-      // Get top sites with error handling
-      const topSites = await new Promise((resolve) => {
-        chrome.topSites.get((sites) => {
-          resolve(sites || []);
-        });
-      });
-
-      // Get history items with error handling
       const historyItems = await new Promise((resolve) => {
         chrome.history.search({
           text: query,
-          maxResults: 10,
-          startTime: Date.now() - (30 * 24 * 60 * 60 * 1000) // Last 30 days
+          maxResults: 100,
+          startTime: 0
         }, (items) => {
           resolve(items || []);
         });
       });
 
-      // Combine and format items as commands
-      const allItems = [...topSites, ...historyItems];
-      const uniqueItems = Array.from(
-        new Map(
-          allItems.map(item => [item.url, {
-            ...item,
-            score: (topSites.find(s => s.url === item.url) ? 2 : 0) + 
-                   (item.visitCount || 0)
-          }])
-        ).values()
-      );
-      
-      return uniqueItems
+      // Group by host and get highest scored items
+      const hostMap = new Map();
+      historyItems.forEach(item => {
+        try {
+          const host = new URL(item.url).hostname;
+          const score = (item.visitCount || 0) + (item.typedCount || 0);
+          if (!hostMap.has(host) || score > hostMap.get(host).score) {
+            hostMap.set(host, { ...item, score });
+          }
+        } catch (e) {}
+      });
+
+      return Array.from(hostMap.values())
+        .filter(item => {
+          try {
+            const host = new URL(item.url).hostname;
+            return host.includes(query.toLowerCase());
+          } catch (e) {
+            return false;
+          }
+        })
         .sort((a, b) => b.score - a.score)
-        .filter(item => 
-          item.url.toLowerCase().includes(query.toLowerCase()) ||
-          (item.title && item.title.toLowerCase().includes(query.toLowerCase()))
-        )
         .slice(0, 5)
         .map(item => ({
-          name: item.title || item.url,
-          description: item.url,
+          name: item.title || new URL(item.url).hostname,
+          description: new URL(item.url).hostname,
           action: () => {
             chrome.tabs.create({ url: item.url });
           },

@@ -19,17 +19,18 @@ chrome.commands.onCommand.addListener(async (command) => {
       try {
         const tab = await chrome.tabs.get(paletteTabId);
         if (tab) {
-          // First switch back to the last active tab
+          // First switch back to the last active tab and window
           await chrome.tabs.update(lastActiveTabId, { active: true });
           await chrome.windows.update(lastActiveWindowId, { focused: true });
           
-          // Then start closing animation and remove palette tab
-          await chrome.tabs.sendMessage(tab.id, { action: 'startClosing' });
-          await new Promise(resolve => setTimeout(resolve, 200));
+          // Small delay to ensure tab switch happens before closing
+          await new Promise(resolve => setTimeout(resolve, 50));
+          
+          // Then close the palette tab
           await chrome.tabs.remove(paletteTabId);
         }
       } catch (e) {
-        // Tab doesn't exist anymore
+        console.error('Error closing palette:', e);
       }
       paletteTabId = null;
     } else {
