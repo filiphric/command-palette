@@ -66,6 +66,7 @@ body.closing::before {
   --selected-bg: #f0f0f0;
   --text-color: #000;
   --container-bg: rgba(255, 255, 255);
+  --svg-filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -75,6 +76,13 @@ body.closing::before {
     --selected-bg: #383838;
     --text-color: #fff;
     --container-bg: rgba(30, 30, 30);
+  }
+}
+
+/* For light theme */
+@media (prefers-color-scheme: light) {
+  :root {
+    --svg-filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
   }
 }
 
@@ -136,6 +144,11 @@ body.closing::before {
   height: 16px;
   flex-shrink: 0;
   object-fit: contain;
+}
+
+/* Add specific styling for system icons */
+.cmd-palette-icon[src^="data:image/svg+xml"] {
+  filter: var(--svg-filter);
 }
 
 .cmd-palette-shortcut {
