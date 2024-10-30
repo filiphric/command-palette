@@ -5,6 +5,7 @@ let currentScreenshot = null;
 let lastActiveTabId = null;
 let lastActiveWindowId = null;
 
+// we create a screenshot of the current tab to be used as a background for the palette
 async function captureTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   lastActiveTabId = tab.id;

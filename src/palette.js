@@ -252,13 +252,8 @@ class CommandPalette {
     // Execute the command first
     await command.action();
     
-    // Only close the palette if it's not a URL/history navigation
-    if (command.type !== 'history') {
-      await this.fadeOutAndClose();
-    } else {
-      // For URL navigation, just close the palette tab without animation
-      chrome.runtime.sendMessage({ command: 'closeTab' });
-    }
+    // Close palette for all commands including tab switching
+    await this.fadeOutAndClose();
   }
 
   async fadeOutAndClose() {

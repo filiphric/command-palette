@@ -24,9 +24,9 @@
   "commands": {
     "toggle-command-palette": {
       "suggested_key": {
-        "mac": "Command+K",
-        "windows": "Ctrl+K",
-        "linux": "Ctrl+K"
+        "mac": "Command+Shift+P",
+        "windows": "Ctrl+Shift+P",
+        "linux": "Ctrl+Shift+P"
       },
       "description": "Toggle command palette"
     }
